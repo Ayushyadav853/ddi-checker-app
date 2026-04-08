@@ -1,99 +1,107 @@
 import streamlit as st
 import json
 
-# ---------------- PAGE CONFIG ----------------
+# ---------------- 1. PAGE CONFIG ----------------
 st.set_page_config(
     page_title="DDI Clinical Checker",
     page_icon="💊",
     layout="centered"
 )
 
-# ---------------- SESSION STATE (Consent Logic) ----------------
+# ---------------- 2. SESSION STATE (Consent Logic) ----------------
 if "accepted" not in st.session_state:
     st.session_state.accepted = False
 
-# ================= 1. ENTRY CONSENT SCREEN =================
+# ================= 3. ENTRY CONSENT SCREEN =================
 if not st.session_state.accepted:
     st.markdown("""
     <div style="padding:30px; border-radius:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15); line-height:1.6;">
-        <h2>💊 DDI Clinical Checker</h2>
-        <h4>Drug-Drug Interaction Screening Interface</h4>
+        <h2>🩺 DDI Clinical Checker</h2>
+        <h4>Clinical Decision Support Screening Interface</h4>
         <hr>
-        [span_6](start_span)<b>Purpose:</b> This prototype identifies potential clinical risks when taking multiple medications simultaneously[span_6](end_span).
+        <b>Purpose of this system:</b><br>
+        This application is designed as a <b>community-pharmacy clinical screening assistant</b> 
+        [span_3](start_span)that helps identify potential drug-drug interaction risks before dispensing medications[span_3](end_span).
         <br><br>
-        [span_7](start_span)<b>⚠ Important Notice:</b> This software is a <b>B.Pharm clinical decision-support prototype</b> for educational purposes only[span_7](end_span). 
-        [span_8](start_span)[span_9](start_span)It does not replace a doctor's consultation or laboratory diagnosis[span_8](end_span)[span_9](end_span).
+        <b>⚠ Important Notice:</b><br>
+        This software is developed as a <b>B.Pharm clinical decision-support prototype</b> 
+        [span_4](start_span)for educational and screening purposes only[span_4](end_span). Users are strongly advised to consult 
+        [span_5](start_span)a qualified healthcare professional for accurate diagnosis and treatment[span_5](end_span).
     </div>
     """, unsafe_allow_html=True)
 
-    agree = st.checkbox("I understand this system provides screening support only.")
-    if agree and st.button("Enter Clinical Screening Interface"):
-        st.session_state.accepted = True
-        st.rerun()
+    st.write("")
+    agree = st.checkbox("I understand this system provides screening support only and does not replace professional medical consultation.")
+
+    if agree:
+        if st.button("Enter Clinical Screening Interface"):
+            st.session_state.accepted = True
+            st.rerun()
     st.stop()
 
-# ================= 2. HEADER & DATA LOADING =================
-st.title("💊 DDI Clinical Checker")
-[span_10](start_span)st.caption("Community Pharmacy Interaction Assistant | Risk Classification | Clinical Guidance[span_10](end_span)")
+# ================= 4. HEADER =================
+st.title("🩺 DDI Clinical Checker")
+st.caption("Community Pharmacy Interaction Assistant | Risk Classification | Clinical Guidance")
+st.divider()
 
+# ================= 5. DATA LOADING =================
 def load_data():
     try:
         with open('data.json', 'r') as f:
             return json.load(f)
     except:
+        st.error("Database (data.json) not found or formatted incorrectly.")
         return []
 
 interactions = load_data()
-all_drugs = sorted(list(set([i['drug1'] for i in interactions] + [i['drug2'] for i in interactions])))
 
-# ================= 3. INPUT PANEL =================
+# Extract unique drugs for the dropdowns
+all_drugs = set()
+for item in interactions:
+    all_drugs.add(item.get('drug1'))
+    all_drugs.add(item.get('drug2'))
+drug_options = sorted([d for d in all_drugs if d])
+
+# ================= 6. INPUT PANEL =================
 st.subheader("👤 Medication Profile")
 col1, col2 = st.columns(2)
 
 with col1:
-    drug_a = st.selectbox("Select First Medication", options=all_drugs, index=None, placeholder="Search...")
+    drug_a = st.selectbox("Select First Medication", options=drug_options, index=None, placeholder="Type to search...")
 
 with col2:
-    drug_b = st.selectbox("Select Second Medication", options=all_drugs, index=None, placeholder="Search...")
+    drug_b = st.selectbox("Select Second Medication", options=all_drugs, index=None, placeholder="Type to search...")
 
-dosage_freq = st.select_slider(
-    "Combined Dosage Frequency (Total doses per day)",
-    options=["1 time", "2 times", "3 times", "4+ times"]
-)
-
+[span_6](start_span)severity = st.slider("Patient Sensitivity / Severity Level", 1, 10, 3) # Modeled after friend's severity slider[span_6](end_span)
 st.divider()
 
-# ================= 4. INTERACTION ENGINE =================
-def assess_ddi(d1, d2):
-    res = next((item for item in interactions if 
-                (item['drug1'] == d1 and item['drug2'] == d2) or 
-                (item['drug1'] == d2 and item['drug2'] == d1)), None)
-    return res
-
-# ================= 5. RESULTS INTERFACE =================
-[span_11](start_span)if st.button("Run Clinical Screening[span_11](end_span)"):
+# ================= 7. SCREENING LOGIC =================
+if st.button("Run Clinical Screening"):
     if not drug_a or not drug_b:
         st.warning("Please select both medications.")
     elif drug_a == drug_b:
         st.info("Same medication selected. No interaction found.")
     else:
-        result = assess_ddi(drug_a, drug_b)
-        
+        # Search for interaction in both directions
+        res = next((item for item in interactions if 
+                    (item['drug1'] == drug_a and item['drug2'] == drug_b) or 
+                    (item['drug1'] == drug_b and item['drug2'] == drug_a)), None)
+
         st.subheader("🧠 Clinical Impression")
-        if result:
-            # [span_12](start_span)Color-coded Risk Level[span_12](end_span)
-            if result['level'] == "RED":
-                st.error(f"HIGH RISK INTERACTION: {result['level']}")
-                st.subheader("🚨 Clinical Alert")
-                st.write(result['message'])
-                [span_13](start_span)st.error("Immediate pharmacist or physician consultation required[span_13](end_span).")
+        
+        if res:
+            if res['level'] == "RED":
+                st.error(f"HIGH RISK: {res['level']}")
+                st.subheader("🚨 Red Flag Indicators")
+                st.write(f"• {res['message']}")
+                st.error("Immediate pharmacist intervention or physician referral required.")
             else:
-                st.warning(f"MODERATE RISK INTERACTION: {result['level']}")
+                st.warning(f"MODERATE RISK: {res['level']}")
                 st.subheader("📖 Clinical Explanation")
-                st.write(result['message'])
+                st.write(res['message'])
         else:
-            st.success("✅ NO MAJOR INTERACTION DETECTED")
-            st.write(f"No significant documented interactions between **{drug_a}** and **{drug_b}** in our current clinical database.")
+            st.success("✅ No Major Interaction Detected")
+            st.write("No significant documented interactions found in the current database for this combination.")
 
 st.divider()
-[span_14](start_span)st.caption("DDI Clinical Checker | B.Pharm Final Year Project Prototype[span_14](end_span)")
+st.caption("DDI Clinical Checker | Clinical Decision Support Prototype | B.Pharm Project")
