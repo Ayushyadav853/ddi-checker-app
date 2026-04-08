@@ -1,0 +1,6 @@
+[
+  { "drug1": "Warfarin", "drug2": "Aspirin", "level": "RED", "message": "High risk of bleeding." },
+  { "drug1": "Sildenafil", "drug2": "Nitroglycerin", "level": "RED", "message": "Severe hypotension (dangerously low BP)." },
+  { "drug1": "Amlodipine", "drug2": "Simvastatin", "level": "YELLOW", "message": "Increased risk of muscle toxicity." },
+  { "drug1": "Metformin", "drug2": "Amlodipine", "level": "GREEN", "message": "No known interaction." }
+]
