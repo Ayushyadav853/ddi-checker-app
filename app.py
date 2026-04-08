@@ -1,77 +1,73 @@
 import streamlit as st
 import json
 
-# 1. LOAD DATA
+# 1. LOAD DATA WITH SAFETY
 def load_data():
-    with open('data.json') as f:
-        return json.load(f)
+    try:
+        with open('data.json', 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        st.error(f"Failed to load database: {e}")
+        return []
 
 interactions = load_data()
 
-# 2. DEFINE THE DRUG LIST (The 500+ Top Indian Drugs)
-# You can expand this list as much as you want
-drug_options = sorted([
-    "Paracetamol", "Dolo 650", "Metformin", "Telmisartan", "Amlodipine", 
-    "Atorvastatin", "Amoxicillin", "Azithromycin", "Pantoprazole", 
-    "Sildenafil", "Warfarin", "Aspirin", "Insulin", "Glimepiride",
-    "Vildagliptin", "Teneligliptin", "Losartan", "Diclofenac", "Aceclofenac"
-    # ... add all 500 names here
-])
+# 2. AUTOMATIC DRUG LIST GENERATION
+# This gathers all drugs from 'drug1' and 'drug2' columns in your JSON
+all_drugs = set()
+for item in interactions:
+    all_drugs.add(item['drug1'])
+    all_drugs.add(item['drug2'])
+drug_options = sorted(list(all_drugs))
 
-# 3. PAGE CONFIG
+# 3. UI DESIGN
 st.set_page_config(page_title="DDI Checker India", page_icon="💊", layout="centered")
 
-st.title("🇮🇳 Indian Drug-Drug Interaction Checker")
-st.markdown("---")
+st.title("💊 Indian Drug Interaction Checker")
+st.info("Select two medications to check for potential safety risks.")
 
-# 4. SMART SEARCH IMPLEMENTATION
-st.subheader("Search Medications")
+# 4. THE SMART SELECT BOXES
 col1, col2 = st.columns(2)
 
 with col1:
-    # 'index=None' makes the box empty by default
-    # 'placeholder' gives the user a hint
     drug_a = st.selectbox(
-        "First Molecule / Brand",
+        "First Drug",
         options=drug_options,
         index=None,
-        placeholder="Type to search (e.g. Telmisartan)...",
-        key="drug_a"
+        placeholder="Type to search..."
     )
 
 with col2:
     drug_b = st.selectbox(
-        "Second Molecule / Brand",
+        "Second Drug",
         options=drug_options,
         index=None,
-        placeholder="Type to search (e.g. Aspirin)...",
-        key="drug_b"
+        placeholder="Type to search..."
     )
 
-# 5. INTERACTION LOGIC
-if st.button("🔍 Check Compatibility", use_container_width=True):
+# 5. CHECK LOGIC
+if st.button("Check Interaction", use_container_width=True):
     if drug_a and drug_b:
         if drug_a == drug_b:
-            st.info("You have selected the same drug twice.")
+            st.warning("Same medication selected. No interaction found.")
         else:
-            # Finding the match in JSON
-            res = next((item for item in interactions if 
-                        (item['drug1'] == drug_a and item['drug2'] == drug_b) or 
-                        (item['drug1'] == drug_b and item['drug2'] == drug_a)), None)
-
-            if res:
-                if res['level'] == "RED":
-                    st.error(f"### ❌ High Risk: {drug_a} + {drug_b}")
-                    st.markdown(f"**Clinical Alert:** {res['message']}")
-                elif res['level'] == "YELLOW":
-                    st.warning(f"### ⚠️ Moderate Risk: {drug_a} + {drug_b}")
-                    st.markdown(f"**Monitoring Required:** {res['message']}")
+            # Search logic (checks both A+B and B+A)
+            match = next((i for i in interactions if 
+                         (i['drug1'] == drug_a and i['drug2'] == drug_b) or 
+                         (i['drug1'] == drug_b and i['drug2'] == drug_a)), None)
+            
+            if match:
+                if match['level'] == "RED":
+                    st.error(f"### ❌ {match['level']}: DANGEROUS")
+                else:
+                    st.warning(f"### ⚠️ {match['level']}: CAUTION")
+                st.subheader("Why?")
+                st.write(match['message'])
             else:
-                st.success(f"### ✅ No Major Interaction Found")
-                st.write(f"The combination of **{drug_a}** and **{drug_b}** appears safe based on our current database.")
+                st.success("### ✅ Safe Combination")
+                st.write(f"No major interaction documented between **{drug_a}** and **{drug_b}** in our list.")
     else:
-        st.error("Please select both medications to run the check.")
+        st.error("Please select two drugs first!")
 
-# 6. FOOTER
 st.markdown("---")
-st.caption("⚠️ **Disclaimer:** This tool is for academic purposes. Consult a registered medical practitioner before changing medication.")
+st.caption("Educational tool only. Always follow your doctor's prescription.")
