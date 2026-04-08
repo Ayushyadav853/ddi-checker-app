@@ -1,4 +1,20 @@
 [
+  { "drug1": "Telmisartan", "drug2": "Ibuprofen", "level": "YELLOW", "message": "NSAIDs can reduce the blood-pressure-lowering effect of Telmisartan and increase kidney strain." },
+  { "drug1": "Pantoprazole", "drug2": "Ketoconazole", "level": "RED", "message": "Acid blockers prevent the absorption of Ketoconazole, making the antifungal treatment fail." },
+  { "drug1": "Metformin", "drug2": "Alcohol", "level": "RED", "message": "High risk of Lactic Acidosis (a life-threatening medical emergency)." },
+  { "drug1": "Atorvastatin", "drug2": "Clarithromycin", "level": "RED", "message": "Antibiotic blocks statin breakdown; high risk of muscle breakdown (Rhabdomyolysis)." },
+  { "drug1": "Azithromycin", "drug2": "Ondansetron", "level": "YELLOW", "message": "Both can affect heart rhythm (QT prolongation). Use with caution." },
+  { "drug1": "Glimepiride", "drug2": "Gatifloxacin", "level": "RED", "message": "Severe fluctuations in blood sugar (Hypoglycemia/Hyperglycemia)." },
+  { "drug1": "Montelukast", "drug2": "Phenobarbital", "level": "YELLOW", "message": "Phenobarbital reduces the effectiveness of Montelukast for asthma." },
+  { "drug1": "Amoxicillin", "drug2": "Methotrexate", "level": "RED", "message": "Penicillins reduce the excretion of Methotrexate, leading to severe toxicity." },
+  { "drug1": "Iron Supplements", "drug2": "Levofloxacin", "level": "RED", "message": "Iron binds to the antibiotic in the stomach, preventing it from working. Space by 2 hours." },
+  { "drug1": "Warfarin", "drug2": "Turmeric/Curcumin", "level": "YELLOW", "message": "High doses of turmeric (common in Indian diets) can enhance bleeding risk with anticoagulants." },
+  { "drug1": "Sildenafil", "drug2": "Amlodipine", "level": "YELLOW", "message": "Additive effect may cause significantly low blood pressure and dizziness." },
+  { "drug1": "Vildagliptin", "drug2": "Aceclofenac", "level": "YELLOW", "message": "NSAIDs can worsen kidney function in diabetic patients." },
+  { "drug1": "Ciprofloxacin", "drug2": "Dairy Products", "level": "YELLOW", "message": "Calcium in milk reduces antibiotic absorption. Avoid taking together." },
+  { "drug1": "Thyroxine", "drug2": "Soy Protein", "level": "YELLOW", "message": "Soy can interfere with the absorption of thyroid medication." },
+  { "drug1": "Digoxin", "drug2": "Amiodarone", "level": "RED", "message": "Amiodarone can double the concentration of Digoxin, leading to heart toxicity." }
+
   { "drug1": "Warfarin", "drug2": "Aspirin", "level": "RED", "message": "High risk of internal bleeding; antiplatelet + anticoagulant effect." },
   { "drug1": "Sildenafil", "drug2": "Nitroglycerin", "level": "RED", "message": "Critical drop in blood pressure (Fatal Hypotension)." },
   { "drug1": "Simvastatin", "drug2": "Amlodipine", "level": "YELLOW", "message": "Increased statin levels; risk of muscle pain (Rhabdomyolysis)." },
